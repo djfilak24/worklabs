@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(SKILL_ASSETS=\"/Users/davidfilak/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/da173333-7e2b-40c9-9063-0643403d7577/1f442a94-2a3a-4fdf-a396-658e83a00b69/skills/nelson-page-deploy/assets\")",
+      "Bash(WD=\"/Users/davidfilak/Library/CloudStorage/OneDrive-NWH/Claude CoWork/Work Labs/Sites/WorkLabs\")",
+      "Bash(__NEW_LINE_22ceb61c1c8b5ec8__ mkdir:*)",
+      "Bash(__NEW_LINE_22ceb61c1c8b5ec8__ cp:*)",
+      "Bash(cp \"$SKILL_ASSETS/fonts/DidotLTStd-Bold.otf\" \"$WD/public/fonts/\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(find /var/folders -name *.jpg -newer /tmp)",
+      "Bash(find /tmp -name *.jpg -o -name *.png)",
+      "Bash(\"/Users/davidfilak/Library/CloudStorage/OneDrive-NWH/Claude CoWork/Work Labs/Sites/WorkLabs/public/photos/README.txt\")",
+      "Bash(npx next:*)",
+      "Bash(find /var/folders -name *.jpg -newer '/Users/davidfilak/Library/CloudStorage/OneDrive-NWH/Claude CoWork/Work Labs/Sites/WorkLabs/public/photos/README.txt')",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(find /var/folders -name *.jpg)",
+      "Bash(find /private/var/folders -name *.jpg)",
+      "Bash(find ~/Downloads -name *.jpg -newer '/Users/davidfilak/Library/CloudStorage/OneDrive-NWH/Claude CoWork/Work Labs/Sites/WorkLabs/package.json')",
+      "Bash(ls -lt ~/Downloads/*.jpg)",
+      "Bash(ls -lt ~/Desktop/*.jpg)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)"
+    ]
+  }
+}
