@@ -102,7 +102,10 @@ const CSS=`
   @keyframes wlOrb2  {0%{transform:translate(0,0) scale(1)}30%{transform:translate(-120px,60px) scale(1.1)}60%{transform:translate(90px,-100px) scale(.9)}85%{transform:translate(40px,50px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
   @keyframes wlOrb3  {0%{transform:translate(0,0) scale(1)}25%{transform:translate(80px,50px) scale(1.08)}50%{transform:translate(-60px,90px) scale(.96)}75%{transform:translate(-80px,-40px) scale(1.04)}100%{transform:translate(0,0) scale(1)}}
   @keyframes wlSweep {0%{transform:translateX(-40vw);opacity:0}8%{opacity:1}88%{opacity:.7}100%{transform:translateX(130vw);opacity:0}}
-  @keyframes wlMark  {0%{opacity:0;transform:translate(-50%,-50%) scale(.82)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}78%{opacity:.55;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.04)}}
+  @keyframes wlMark       {0%{opacity:0;transform:translate(-50%,-50%) scale(.82)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}78%{opacity:.55;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.04)}}
+  @keyframes wlStrikeDraw {from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
+  @keyframes wlPulseRing  {0%{transform:scale(1);opacity:.75}100%{transform:scale(1.65);opacity:0}}
+  @keyframes wlBounceArrow{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(7px);opacity:.9}}
 
   .wl-card{cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,border-color .3s ease;}
   .wl-card:hover,.wl-card.wl-demo{transform:translateY(-6px);box-shadow:0 28px 56px rgba(0,0,0,.65),0 0 0 1px rgba(0,186,220,.3);border-color:rgba(0,186,220,.25)!important;}
@@ -249,16 +252,177 @@ function HeroCanvas(){
   );
 }
 
+// ─── PRELOADER ──────────────────────────────
+function Preloader({onDone}){
+  const [ey,setEy]=useState(false);   // eyebrow
+  const [wo,setWo]=useState(false);   // words appear
+  const [st,setSt]=useState(false);   // strike draws
+  const [lb,setLb]=useState(false);   // labs slides in
+  const [pg,setPg]=useState(false);   // place gone
+  const [pu,setPu]=useState(false);   // pulse ring
+  const [lk,setLk]=useState(false);   // lockup
+  const [sh,setSh]=useState(false);   // scroll hint
+  const [rdy,setRdy]=useState(false); // scroll ready
+  const [exiting,setExiting]=useState(false);
+  const [gone,setGone]=useState(false);
+
+  useEffect(()=>{
+    let c=false;
+    const w=ms=>new Promise(r=>setTimeout(r,ms));
+    (async()=>{
+      await w(400);  if(c)return; setEy(true);
+      await w(500);  if(c)return; setWo(true);
+      await w(900);  if(c)return; setSt(true);
+      await w(480);  if(c)return; setLb(true);
+      await w(320);  if(c)return; setPg(true);setPu(true);
+      await w(900);  if(c)return; setPu(false);
+      await w(80);   if(c)return; setLk(true);
+      await w(480);  if(c)return; setSh(true);
+      await w(320);  if(c)return; setRdy(true);
+    })();
+    return()=>{c=true;};
+  },[]);
+
+  useEffect(()=>{
+    if(!rdy)return;
+    let fired=false;
+    function doExit(){
+      if(fired)return; fired=true;
+      setExiting(true);
+      setTimeout(()=>setGone(true),560);
+      setTimeout(onDone,900);
+    }
+    function onWh(e){if(e.deltaY>0)doExit();}
+    let ty=0;
+    function onTs(e){ty=e.touches[0].clientY;}
+    function onTe(e){if(ty-e.changedTouches[0].clientY>30)doExit();}
+    window.addEventListener('wheel',onWh,{passive:true});
+    window.addEventListener('touchstart',onTs,{passive:true});
+    window.addEventListener('touchend',onTe,{passive:true});
+    return()=>{
+      window.removeEventListener('wheel',onWh);
+      window.removeEventListener('touchstart',onTs);
+      window.removeEventListener('touchend',onTe);
+    };
+  },[rdy,onDone]);
+
+  if(gone)return null;
+
+  const FS="clamp(46px,7vw,82px)";
+  const TS="opacity 0.6s ease, transform 0.65s cubic-bezier(.22,1,.36,1)";
+
+  return(
+    <div style={{
+      position:"fixed",inset:0,zIndex:9999,
+      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+      fontFamily:"'Poppins',sans-serif",userSelect:"none",
+      opacity:exiting?0:1,transition:exiting?"opacity 0.5s ease":"none",
+    }}>
+      {/* Stage */}
+      <div style={{
+        display:"flex",flexDirection:"column",alignItems:"center",
+        transform:exiting?"translateY(-65px)":"translateY(0)",
+        transition:exiting?"transform 0.55s cubic-bezier(.22,1,.36,1)":"none",
+      }}>
+        {/* Eyebrow */}
+        <div style={{
+          fontSize:11,letterSpacing:"0.28em",color:"#3a5a60",
+          textTransform:"uppercase",fontWeight:400,marginBottom:24,
+          opacity:ey?1:0,transform:ey?"translateY(0)":"translateY(8px)",
+          transition:"opacity 0.5s ease, transform 0.5s ease",
+        }}>Nelson Worldwide</div>
+
+        {/* Word row */}
+        <div style={{display:"inline-flex",alignItems:"baseline",position:"relative"}}>
+          {/* Pulse ring — fires when place exits */}
+          {pu&&<div style={{
+            position:"absolute",inset:"-10px -14px",
+            border:"1.5px solid rgba(0,186,220,.6)",borderRadius:6,
+            pointerEvents:"none",animation:"wlPulseRing 0.9s cubic-bezier(.2,.8,.3,1) forwards",
+          }}/>}
+
+          {/* WORK — always white */}
+          <span style={{
+            fontSize:FS,fontWeight:700,color:"#ffffff",letterSpacing:"-0.02em",display:"inline-block",
+            opacity:wo?1:0,transform:wo?"translateY(0) scale(1)":"translateY(14px) scale(1.02)",
+            transition:TS,
+          }}>Work</span>
+
+          {/* PLACE wrapper — collapses when pg */}
+          <div style={{
+            display:"inline-block",overflow:"hidden",whiteSpace:"nowrap",
+            maxWidth:pg?"0px":"300px",opacity:pg?0:1,
+            transition:"max-width 0.42s cubic-bezier(.4,0,.2,1), opacity 0.2s ease",
+          }}>
+            <div style={{position:"relative",display:"inline-block"}}>
+              <span style={{
+                fontSize:FS,fontWeight:700,color:"#ffffff",letterSpacing:"-0.02em",display:"inline-block",
+                opacity:wo?1:0,transform:wo?"translateY(0) scale(1)":"translateY(14px) scale(1.02)",
+                transition:`${TS} 0.05s`,
+              }}>place</span>
+              {/* Sketchy angled SVG strikethrough */}
+              {st&&(
+                <svg viewBox="0 0 200 14" preserveAspectRatio="none" style={{
+                  position:"absolute",left:-2,top:"50%",
+                  width:"calc(100% + 4px)",height:14,
+                  transform:"translateY(-50%) rotate(-2.5deg)",
+                  overflow:"visible",pointerEvents:"none",
+                }}>
+                  <path
+                    d="M 3 8 C 28 5, 55 10, 88 6 S 128 9, 162 6 L 197 7"
+                    stroke="#e03030" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"
+                    style={{strokeDasharray:300,animation:"wlStrikeDraw 0.38s cubic-bezier(.4,0,.2,1) forwards"}}
+                  />
+                </svg>
+              )}
+            </div>
+          </div>
+
+          {/* LABS — cyan, typewriter slide-in */}
+          <span style={{
+            fontSize:FS,fontWeight:700,color:"#00BADC",letterSpacing:"-0.02em",
+            display:"inline-block",overflow:"hidden",whiteSpace:"nowrap",
+            maxWidth:lb?"400px":"0px",opacity:lb?1:0,
+            transition:"max-width 0.32s cubic-bezier(.4,0,.2,1), opacity 0.18s ease",
+          }}> Labs</span>
+        </div>
+
+        {/* Lockup — Nelson · Work Labs */}
+        <div style={{
+          display:"flex",alignItems:"center",gap:12,marginTop:14,
+          opacity:lk?1:0,transform:lk?"translateY(0)":"translateY(6px)",
+          transition:"opacity 0.5s ease, transform 0.5s ease",
+        }}>
+          <span style={{fontSize:11,letterSpacing:"0.22em",color:"#3a5a60",textTransform:"uppercase",fontWeight:600}}>Nelson</span>
+          <div style={{width:1,height:18,background:"#2a4a50"}}/>
+          <span style={{fontSize:11,letterSpacing:"0.22em",color:"#3a5a60",textTransform:"uppercase",fontWeight:600}}>Work Labs</span>
+        </div>
+      </div>
+
+      {/* Scroll hint */}
+      <div style={{
+        position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",
+        display:"flex",flexDirection:"column",alignItems:"center",gap:10,
+        opacity:sh?1:0,transition:"opacity 0.6s ease",pointerEvents:"none",
+      }}>
+        <span style={{fontSize:10,letterSpacing:"0.2em",color:"#3a5a60",textTransform:"uppercase"}}>Scroll to explore</span>
+        <div style={{width:1,height:32,background:"linear-gradient(to bottom,#3a5a60,transparent)",animation:"wlBounceArrow 1.6s ease-in-out infinite"}}/>
+      </div>
+    </div>
+  );
+}
+
 // ─── HERO ───────────────────────────────────
-function Hero(){
+function Hero({preloaderDone}){
   const [rdy,setRdy]=useState(false);const [heroVis,setHeroVis]=useState(true);const isMobile=useIsMobile();
   useEffect(()=>{
+    if(!preloaderDone)return;
     const t=setTimeout(()=>setRdy(true),80);
     const root=document.querySelector(".wl");
     const fn=()=>{const el=root||document.documentElement;setHeroVis(el.scrollTop<window.innerHeight*.65);};
     const tgt=root||window;tgt.addEventListener("scroll",fn,{passive:true});
     return()=>{clearTimeout(t);tgt.removeEventListener("scroll",fn);};
-  },[]);
+  },[preloaderDone]);
   const a=(d)=>rdy?{animation:`wlUp .65s cubic-bezier(.22,1,.36,1) ${d}s both`}:{opacity:0};
   return(
     <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:`0 ${isMobile?"24px":"48px"} clamp(80px,10vh,100px)`,overflow:"hidden",background:BG}}>
@@ -796,16 +960,20 @@ function Footer(){
 // ─── ROOT ───────────────────────────────────
 export default function WorkLabs(){
   const [menuOpen,setMenuOpen]=useState(false);
+  const [preloaderDone,setPreloaderDone]=useState(false);
   return(
-    <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:"auto"}}>
-      <style>{CSS}</style>
-      <DynamicIslandNav menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
-      <MenuOverlay open={menuOpen} onClose={()=>setMenuOpen(false)}/>
-      <Hero/>
-      <NetworkSection/>
-      <WorkSection/>
-      <Manifesto/>
-      <Footer/>
-    </div>
+    <>
+      {!preloaderDone&&<Preloader onDone={()=>setPreloaderDone(true)}/>}
+      <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:preloaderDone?"auto":"hidden"}}>
+        <style>{CSS}</style>
+        <DynamicIslandNav menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
+        <MenuOverlay open={menuOpen} onClose={()=>setMenuOpen(false)}/>
+        <Hero preloaderDone={preloaderDone}/>
+        <NetworkSection/>
+        <WorkSection/>
+        <Manifesto/>
+        <Footer/>
+      </div>
+    </>
   );
 }
