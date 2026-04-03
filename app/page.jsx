@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // ─────────────────────────────────────────────
 // CONTENT
@@ -92,7 +92,6 @@ const CSS=`
   @keyframes wlModal {from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
   @keyframes wlBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
   @keyframes wlPulse {0%,100%{opacity:0.5}50%{opacity:0.1}}
-  @keyframes wlCount {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   @keyframes greenGlow{0%,100%{background:#4ade80;box-shadow:0 0 4px #4ade80,0 0 10px rgba(74,222,128,.4);transform:scale(1);}50%{background:#6ef09a;box-shadow:0 0 8px #4ade80,0 0 18px rgba(74,222,128,.6);transform:scale(1.3);}}
   @keyframes nodePulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
   @keyframes centerBreath{0%,100%{box-shadow:0 0 0 0 rgba(0,186,220,0),0 0 28px rgba(0,186,220,.35)}50%{box-shadow:0 0 0 14px rgba(0,186,220,0),0 0 52px rgba(0,186,220,.55)}}
@@ -106,6 +105,7 @@ const CSS=`
   @keyframes wlStrikeDraw {from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
   @keyframes wlPulseRing  {0%{transform:scale(1);opacity:.75}100%{transform:scale(1.65);opacity:0}}
   @keyframes wlBounceArrow{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(7px);opacity:.9}}
+  @keyframes wlTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
   .wl-card{cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,border-color .3s ease;}
   .wl-card:hover,.wl-card.wl-demo{transform:translateY(-6px);box-shadow:0 28px 56px rgba(0,0,0,.65),0 0 0 1px rgba(0,186,220,.3);border-color:rgba(0,186,220,.25)!important;}
@@ -206,11 +206,8 @@ function MenuOverlay({open,onClose}){
 // ─── HERO CANVAS ────────────────────────────
 // Blueprint corner-mark registration nodes — staggered so they never all appear at once
 const MARK_NODES=[
-  {top:"24%",left:"63%",size:38,del:0,   dur:6.5},
-  {top:"56%",left:"77%",size:30,del:3.0, dur:7.2},
-  {top:"74%",left:"60%",size:44,del:6.2, dur:6.0},
-  {top:"38%",left:"86%",size:32,del:9.5, dur:7.8},
-  {top:"14%",left:"79%",size:26,del:12.4,dur:6.3},
+  {top:"12%",left:"84%",size:32,del:0,   dur:6.5},
+  {top:"82%",left:"88%",size:38,del:4.8, dur:6.0},
 ];
 const ARM=10; // corner arm length in px
 const C="rgba(0,186,220,.45)"; // corner stroke color
@@ -254,14 +251,12 @@ function HeroCanvas(){
 
 // ─── PRELOADER ──────────────────────────────
 function Preloader({onDone}){
-  const [ey,setEy]=useState(false);   // eyebrow
   const [wo,setWo]=useState(false);   // words appear
   const [st,setSt]=useState(false);   // strike draws
   const [lb,setLb]=useState(false);   // labs slides in
   const [pg,setPg]=useState(false);   // place gone
   const [pu,setPu]=useState(false);   // pulse ring
-  const [lk,setLk]=useState(false);   // lockup
-  const [sh,setSh]=useState(false);   // scroll hint
+  const [sh,setSh]=useState(false);   // scroll hint + ticker
   const [rdy,setRdy]=useState(false); // scroll ready
   const [exiting,setExiting]=useState(false);
   const [gone,setGone]=useState(false);
@@ -270,15 +265,13 @@ function Preloader({onDone}){
     let c=false;
     const w=ms=>new Promise(r=>setTimeout(r,ms));
     (async()=>{
-      await w(400);  if(c)return; setEy(true);
-      await w(500);  if(c)return; setWo(true);
-      await w(900);  if(c)return; setSt(true);
-      await w(480);  if(c)return; setLb(true);
-      await w(320);  if(c)return; setPg(true);setPu(true);
-      await w(900);  if(c)return; setPu(false);
-      await w(80);   if(c)return; setLk(true);
-      await w(480);  if(c)return; setSh(true);
-      await w(320);  if(c)return; setRdy(true);
+      await w(700);  if(c)return; setWo(true);
+      await w(1400); if(c)return; setSt(true);
+      await w(700);  if(c)return; setLb(true);
+      await w(550);  if(c)return; setPg(true);setPu(true);
+      await w(1400); if(c)return; setPu(false);
+      await w(600);  if(c)return; setSh(true);
+      await w(400);  if(c)return; setRdy(true);
     })();
     return()=>{c=true;};
   },[]);
@@ -308,7 +301,7 @@ function Preloader({onDone}){
 
   if(gone)return null;
 
-  const FS="clamp(46px,7vw,82px)";
+  const FS="clamp(64px,10vw,120px)";
   const TS="opacity 0.6s ease, transform 0.65s cubic-bezier(.22,1,.36,1)";
 
   return(
@@ -324,14 +317,6 @@ function Preloader({onDone}){
         transform:exiting?"translateY(-65px)":"translateY(0)",
         transition:exiting?"transform 0.55s cubic-bezier(.22,1,.36,1)":"none",
       }}>
-        {/* Eyebrow */}
-        <div style={{
-          fontSize:11,letterSpacing:"0.28em",color:"#3a5a60",
-          textTransform:"uppercase",fontWeight:400,marginBottom:24,
-          opacity:ey?1:0,transform:ey?"translateY(0)":"translateY(8px)",
-          transition:"opacity 0.5s ease, transform 0.5s ease",
-        }}>Nelson Worldwide</div>
-
         {/* Word row */}
         <div style={{display:"inline-flex",alignItems:"baseline",position:"relative"}}>
           {/* Pulse ring — fires when place exits */}
@@ -351,7 +336,7 @@ function Preloader({onDone}){
           {/* PLACE wrapper — collapses when pg */}
           <div style={{
             display:"inline-block",overflow:"hidden",whiteSpace:"nowrap",
-            maxWidth:pg?"0px":"300px",opacity:pg?0:1,
+            maxWidth:pg?"0px":"50vw",opacity:pg?0:1,
             transition:"max-width 0.42s cubic-bezier(.4,0,.2,1), opacity 0.2s ease",
           }}>
             <div style={{position:"relative",display:"inline-block"}}>
@@ -382,68 +367,68 @@ function Preloader({onDone}){
           <span style={{
             fontSize:FS,fontWeight:700,color:"#00BADC",letterSpacing:"-0.02em",
             display:"inline-block",overflow:"hidden",whiteSpace:"nowrap",
-            maxWidth:lb?"400px":"0px",opacity:lb?1:0,
+            maxWidth:lb?"40vw":"0px",opacity:lb?1:0,
             transition:"max-width 0.32s cubic-bezier(.4,0,.2,1), opacity 0.18s ease",
           }}> Labs</span>
         </div>
 
-        {/* Lockup — Nelson · Work Labs */}
+        {/* Studios ticker */}
         <div style={{
-          display:"flex",alignItems:"center",gap:12,marginTop:14,
-          opacity:lk?1:0,transform:lk?"translateY(0)":"translateY(6px)",
-          transition:"opacity 0.5s ease, transform 0.5s ease",
+          overflow:"hidden",width:"min(90vw,960px)",marginTop:28,
+          opacity:sh?1:0,transition:"opacity 0.6s ease",
+          WebkitMaskImage:"linear-gradient(to right,transparent 0%,black 10%,black 90%,transparent 100%)",
+          maskImage:"linear-gradient(to right,transparent 0%,black 10%,black 90%,transparent 100%)",
         }}>
-          <span style={{fontSize:11,letterSpacing:"0.22em",color:"#3a5a60",textTransform:"uppercase",fontWeight:600}}>Nelson</span>
-          <div style={{width:1,height:18,background:"#2a4a50"}}/>
-          <span style={{fontSize:11,letterSpacing:"0.22em",color:"#3a5a60",textTransform:"uppercase",fontWeight:600}}>Work Labs</span>
+          <div style={{
+            display:"inline-flex",whiteSpace:"nowrap",
+            animation:"wlTicker 36s linear infinite",
+            fontFamily:"'Poppins',sans-serif",fontSize:10,
+            letterSpacing:"0.28em",color:"#3a5a60",textTransform:"uppercase",
+          }}>
+            {["Atlanta","Minneapolis","Philadelphia","Chicago","New York",
+              "Atlanta","Minneapolis","Philadelphia","Chicago","New York"].map((c,i)=>(
+              <span key={i} style={{marginRight:28}}>{c}<span style={{marginLeft:28,opacity:.28}}>·</span></span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Scroll hint */}
+      {/* Scroll hint — arrow only */}
       <div style={{
         position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",
-        display:"flex",flexDirection:"column",alignItems:"center",gap:10,
+        display:"flex",flexDirection:"column",alignItems:"center",
         opacity:sh?1:0,transition:"opacity 0.6s ease",pointerEvents:"none",
       }}>
-        <span style={{fontSize:10,letterSpacing:"0.2em",color:"#3a5a60",textTransform:"uppercase"}}>Scroll to explore</span>
-        <div style={{width:1,height:32,background:"linear-gradient(to bottom,#3a5a60,transparent)",animation:"wlBounceArrow 1.6s ease-in-out infinite"}}/>
+        <div style={{width:1,height:36,background:"linear-gradient(to bottom,#3a5a60,transparent)",animation:"wlBounceArrow 1.6s ease-in-out infinite"}}/>
       </div>
     </div>
   );
 }
 
 // ─── HERO ───────────────────────────────────
+const BADGES=[
+  {dot:"#00BADC",name:"Spatial Strategy",status:"Active"},
+  {dot:"#a78bfa",name:"Brand Identity",status:"In Review"},
+  {dot:"#00BADC",name:"Workplace Research",status:"Active"},
+];
 function Hero({preloaderDone}){
-  const [rdy,setRdy]=useState(false);const [heroVis,setHeroVis]=useState(true);const isMobile=useIsMobile();
+  const [rdy,setRdy]=useState(false);const isMobile=useIsMobile();
   useEffect(()=>{
     if(!preloaderDone)return;
     const t=setTimeout(()=>setRdy(true),80);
-    const root=document.querySelector(".wl");
-    const fn=()=>{const el=root||document.documentElement;setHeroVis(el.scrollTop<window.innerHeight*.65);};
-    const tgt=root||window;tgt.addEventListener("scroll",fn,{passive:true});
-    return()=>{clearTimeout(t);tgt.removeEventListener("scroll",fn);};
+    return()=>clearTimeout(t);
   },[preloaderDone]);
   const a=(d)=>rdy?{animation:`wlUp .65s cubic-bezier(.22,1,.36,1) ${d}s both`}:{opacity:0};
   return(
-    <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:`0 ${isMobile?"24px":"48px"} clamp(80px,10vh,100px)`,overflow:"hidden",background:BG}}>
+    <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",padding:`clamp(100px,13vh,140px) ${isMobile?"24px":"48px"} clamp(48px,7vh,72px)`,overflow:"hidden",background:BG}}>
       {/* Living blueprint background — drifting orbs reveal the grid */}
       <HeroCanvas/>
       {/* Blueprint grid — faint base; orbs + sweep illuminate it */}
       <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",opacity:.048,pointerEvents:"none"}}>
         <defs><pattern id="wlg" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M 48 0 L 0 0 0 48" fill="none" stroke="rgba(180,220,255,1)" strokeWidth=".5"/></pattern></defs>
         <rect width="100%" height="100%" fill="url(#wlg)"/>
-        {/* Blueprint registration marks — 3 datum crosshairs, right half */}
-        {[[62,28],[80,48],[71,72]].map(([cx,cy],i)=>(
-          <g key={i} stroke="rgba(180,220,255,1)" strokeWidth=".6" opacity=".06">
-            <line x1={`${cx}%`} y1={`calc(${cy}% - 8px)`} x2={`${cx}%`} y2={`calc(${cy}% + 8px)`}/>
-            <line x1={`calc(${cx}% - 8px)`} y1={`${cy}%`} x2={`calc(${cx}% + 8px)`} y2={`${cy}%`}/>
-          </g>
-        ))}
       </svg>
-      <div style={{position:"absolute",right:"3%",bottom:"4%",fontFamily:"'DidotLTStd',serif",fontWeight:700,fontSize:"clamp(100px,18vw,240px)",color:"rgba(0,186,220,.038)",lineHeight:1,userSelect:"none",pointerEvents:"none"}}>01</div>
-      <div style={{position:"absolute",top:0,left:0,right:0,height:1,transformOrigin:"left",background:"linear-gradient(90deg,transparent,rgba(0,186,220,.55) 40%,rgba(167,139,250,.3) 70%,transparent)",animation:rdy?"wlLine 1.1s cubic-bezier(.22,1,.36,1) .1s both":"none"}}/>
-      <div style={{position:"relative",zIndex:1,maxWidth:980}}>
-        <div style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:500,letterSpacing:"0.22em",textTransform:"uppercase",color:BLUE,marginBottom:24,animation:rdy?"wlIn .7s ease .2s both":"none"}}>NELSON Worldwide — Work Labs</div>
+      <div style={{position:"relative",zIndex:1,maxWidth:820,width:"100%",textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center"}}>
         {/* Line 1 — Poppins light, context setter */}
         <div style={{lineHeight:1.1,marginBottom:20,...a(.35)}}>
           <span style={{fontFamily:"'Poppins',sans-serif",fontWeight:300,fontSize:"clamp(14px,1.8vw,22px)",color:"rgba(248,248,248,.65)",letterSpacing:"0.04em"}}>{CONTENT.tagline}</span>
@@ -452,26 +437,30 @@ function Hero({preloaderDone}){
         <div style={{lineHeight:1.0,marginBottom:0,...a(.55)}}>
           <span style={{fontFamily:"'DidotLTStd',serif",fontWeight:700,fontSize:"clamp(52px,10vw,100px)",color:FG,letterSpacing:"-0.02em",display:"block"}}>{CONTENT.tagline2}</span>
         </div>
-        {/* Line 3 — Didot bold blue, same size as line 2 */}
+        {/* Line 3 — italic Poppins bold cyan */}
         <div style={{lineHeight:1.0,marginBottom:44,...a(.72)}}>
           <span style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,fontStyle:"italic",fontSize:"clamp(41px,7.9vw,79px)",color:BLUE,letterSpacing:"-0.02em",display:"block"}}>{CONTENT.subtagline}</span>
         </div>
-        <p style={{fontFamily:"'Poppins',sans-serif",fontWeight:300,fontSize:"clamp(14px,1.4vw,17px)",lineHeight:1.82,color:"rgba(248,248,248,.52)",maxWidth:500,...a(1.05)}}>{CONTENT.heroBody}</p>
-        <div style={{display:"flex",gap:12,marginTop:36,flexWrap:"wrap",...a(1.18)}}>
-          <a href="#work" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:500,letterSpacing:"0.12em",textTransform:"uppercase",textDecoration:"none",padding:"12px 28px",background:BLUE,color:BG,borderRadius:2,transition:"opacity .2s"}}
-            onMouseEnter={e=>e.currentTarget.style.opacity=".82"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>Explore the Work</a>
-          <a href="#manifesto" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:500,letterSpacing:"0.12em",textTransform:"uppercase",textDecoration:"none",padding:"12px 28px",border:"1px solid rgba(248,248,248,.18)",color:"rgba(248,248,248,.55)",borderRadius:2,transition:"border-color .2s,color .2s"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(248,248,248,.42)";e.currentTarget.style.color=FG;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(248,248,248,.18)";e.currentTarget.style.color="rgba(248,248,248,.55)";}}>Our Manifesto</a>
+        <p style={{fontFamily:"'Poppins',sans-serif",fontWeight:300,fontSize:"clamp(14px,1.4vw,17px)",lineHeight:1.82,color:"rgba(248,248,248,.52)",maxWidth:560,...a(1.05)}}>{CONTENT.heroBody}</p>
+        <div style={{display:"flex",gap:14,marginTop:36,flexWrap:"wrap",justifyContent:"center",...a(1.18)}}>
+          <a href="#work" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",textDecoration:"none",padding:"15px 38px",background:`linear-gradient(135deg,${BLUE} 0%,#0092b5 100%)`,color:"#fff",borderRadius:6,boxShadow:`0 0 28px rgba(0,186,220,.4),0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)`,transition:"box-shadow .25s,transform .2s"}}
+            onMouseEnter={e=>{e.currentTarget.style.boxShadow=`0 0 48px rgba(0,186,220,.65),0 4px 18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18)`;e.currentTarget.style.transform="translateY(-2px)";}}
+            onMouseLeave={e=>{e.currentTarget.style.boxShadow=`0 0 28px rgba(0,186,220,.4),0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)`;e.currentTarget.style.transform="translateY(0)";}}>Explore the Work</a>
+          <a href="#manifesto" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:500,letterSpacing:"0.14em",textTransform:"uppercase",textDecoration:"none",padding:"15px 38px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(248,248,248,.16)",color:"rgba(248,248,248,.55)",borderRadius:6,backdropFilter:"blur(10px)",boxShadow:"inset 0 1px 0 rgba(255,255,255,.05)",transition:"background .25s,border-color .25s,color .25s,transform .2s,box-shadow .25s"}}
+            onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,186,220,.07)";e.currentTarget.style.borderColor=`rgba(0,186,220,.4)`;e.currentTarget.style.color=BLUE;e.currentTarget.style.boxShadow=`0 0 16px rgba(0,186,220,.15),inset 0 1px 0 rgba(255,255,255,.06)`;e.currentTarget.style.transform="translateY(-2px)";}}
+            onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.03)";e.currentTarget.style.borderColor="rgba(248,248,248,.16)";e.currentTarget.style.color="rgba(248,248,248,.55)";e.currentTarget.style.boxShadow="inset 0 1px 0 rgba(255,255,255,.05)";e.currentTarget.style.transform="translateY(0)";}}>Our Manifesto</a>
+        </div>
+        {/* Live project badges */}
+        <div style={{display:"flex",gap:10,marginTop:28,flexWrap:"wrap",justifyContent:"center",...a(1.35)}}>
+          {BADGES.map((b,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 14px 6px 10px",border:"1px solid rgba(248,248,248,.1)",borderRadius:20,background:"rgba(255,255,255,.04)"}}>
+              <div style={{width:6,height:6,borderRadius:"50%",background:b.dot,boxShadow:`0 0 6px ${b.dot}`,flexShrink:0}}/>
+              <span style={{fontFamily:"'Poppins',sans-serif",fontSize:10,letterSpacing:"0.1em",color:"rgba(248,248,248,.55)",textTransform:"uppercase"}}>{b.name}</span>
+              <span style={{fontFamily:"'Poppins',sans-serif",fontSize:9,letterSpacing:"0.12em",color:b.dot,textTransform:"uppercase",opacity:.8}}>{b.status}</span>
+            </div>
+          ))}
         </div>
       </div>
-      {!isMobile&&(
-        <div style={{position:"absolute",bottom:"28px",left:"50%",transform:"translateX(-50%)",display:"flex",flexDirection:"column",alignItems:"center",gap:"8px",opacity:heroVis?.42:0,transition:"opacity .5s",pointerEvents:"none"}}>
-          <span style={{fontFamily:"'Poppins',sans-serif",fontSize:"9px",letterSpacing:"0.2em",textTransform:"uppercase",color:"rgba(248,248,248,.5)"}}>Scroll to explore</span>
-          <div style={{width:"1px",height:"26px",background:"linear-gradient(to bottom,rgba(248,248,248,.4),transparent)",animation:"wlPulse 2s ease infinite"}}/>
-          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style={{animation:"wlBounce 1.8s ease infinite"}}><path d="M1 1L6 6L11 1" stroke="rgba(248,248,248,.45)" strokeWidth="1.5" strokeLinecap="round"/></svg>
-        </div>
-      )}
     </section>
   );
 }
@@ -594,28 +583,31 @@ function useCountUp(target,active,duration=2500){
   },[target,active,duration]);
   return val;
 }
-function StatItem({stat,active,index,total}){
-  const val=useCountUp(stat.value,active,2200+index*150);
-  const isMobile=useIsMobile();
-  const cols=isMobile?2:4;
-  const col=index%cols;
-  const row=Math.floor(index/cols);
-  const totalRows=Math.ceil(total/cols);
-  const isLastCol=col===cols-1;
-  const isLastRow=row===totalRows-1;
+function StatChip({stat,active,index}){
+  const val=useCountUp(stat.value,active,1800+index*100);
   return(
-    <div style={{textAlign:"center",padding:"32px 16px",position:"relative",opacity:active?1:0,transition:`opacity .5s ease ${index*.12}s`}}>
-      {!isLastCol&&(
-        <div style={{position:"absolute",right:0,top:0,bottom:0,width:1,background:`linear-gradient(to bottom,transparent,${BLUE}35 30%,${BLUE}35 70%,transparent)`,pointerEvents:"none"}}/>
-      )}
-      {!isLastRow&&(
-        <div style={{position:"absolute",bottom:0,left:0,right:0,height:1,background:`linear-gradient(to right,transparent,${BLUE}35 20%,${BLUE}35 80%,transparent)`,pointerEvents:"none"}}/>
-      )}
-      <div style={{fontFamily:"'DidotLTStd',serif",fontWeight:700,fontSize:"clamp(36px,4.2vw,56px)",color:FG,lineHeight:1,letterSpacing:"-0.02em",animation:active?`wlCount .5s ease ${index*.12}s both`:"none"}}>{val}</div>
-      <div style={{fontFamily:"'Poppins',sans-serif",fontSize:"9px",fontWeight:400,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(248,248,248,.28)",marginTop:"8px",marginBottom:"10px"}}>{stat.label}</div>
-      <div style={{display:"inline-flex",alignItems:"center",gap:"4px",padding:"3px 8px",borderRadius:"12px",background:`${stat.color}12`,border:`1px solid ${stat.color}28`,opacity:active?1:0,transition:`opacity .5s ease ${index*.12+.3}s`}}>
-        <span style={{fontSize:"8px",color:stat.color,opacity:.8}}>{stat.icon}</span>
-        <span style={{fontFamily:"'Poppins',sans-serif",fontSize:"8px",fontWeight:500,letterSpacing:"0.1em",textTransform:"uppercase",color:stat.color}}>{stat.badge}</span>
+    <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",
+      gap:10,padding:"15px 20px",
+      opacity:active?1:0,transition:`opacity .5s ease ${index*.1}s`,
+    }}>
+      <span style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,
+        fontSize:"clamp(16px,1.4vw,20px)",color:FG,letterSpacing:"-0.01em",
+        minWidth:"1.4ch",textAlign:"right",lineHeight:1}}>
+        {val}
+      </span>
+      <span style={{fontFamily:"'Poppins',sans-serif",fontSize:9,fontWeight:400,
+        letterSpacing:"0.16em",textTransform:"uppercase",
+        color:"rgba(248,248,248,.28)",whiteSpace:"nowrap"}}>
+        {stat.label}
+      </span>
+      <div style={{display:"inline-flex",alignItems:"center",gap:4,flexShrink:0,
+        padding:"3px 8px",borderRadius:12,
+        background:`${stat.color}15`,border:`1px solid ${stat.color}30`}}>
+        <span style={{width:5,height:5,borderRadius:"50%",background:stat.color,opacity:.85,flexShrink:0,display:"inline-block"}}/>
+        <span style={{fontFamily:"'Poppins',sans-serif",fontSize:8,fontWeight:500,
+          letterSpacing:"0.1em",textTransform:"uppercase",color:stat.color,whiteSpace:"nowrap"}}>
+          {stat.badge}
+        </span>
       </div>
     </div>
   );
@@ -624,11 +616,17 @@ function StatItem({stat,active,index,total}){
 function StatAndFilter({activeFilter,setFilter}){
   const [ref,on]=useReveal(0.15);const isMobile=useIsMobile();
   return(
-    <div ref={ref} style={{background:BG3,borderTop:"1px solid rgba(255,255,255,.05)"}}>
-      <div style={{maxWidth:1400,margin:"0 auto",padding:"0 48px"}}>
-        <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)"}}>
-          {CONTENT.stats.map((s,i)=><StatItem key={i} stat={s} active={on} index={i} total={CONTENT.stats.length}/>)}
-        </div>
+    <div ref={ref} style={{background:BG3,borderTop:"1px solid rgba(255,255,255,.06)",borderBottom:"1px solid rgba(255,255,255,.06)",width:"100%",overflow:"hidden"}}>
+      <div style={{display:"flex",alignItems:"center",flexWrap:isMobile?"wrap":"nowrap",width:"100%"}}>
+        {CONTENT.stats.map((s,i)=>(
+          <React.Fragment key={i}>
+            <StatChip stat={s} active={on} index={i}/>
+            {i<CONTENT.stats.length-1&&(
+              <div style={{width:1,alignSelf:"stretch",flexShrink:0,
+                background:"linear-gradient(to bottom,transparent,rgba(255,255,255,.08) 20%,rgba(255,255,255,.08) 80%,transparent)"}}/>
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
@@ -961,10 +959,18 @@ function Footer(){
 export default function WorkLabs(){
   const [menuOpen,setMenuOpen]=useState(false);
   const [preloaderDone,setPreloaderDone]=useState(false);
+  const [scrollLocked,setScrollLocked]=useState(false);
+  function handlePreloaderDone(){
+    setPreloaderDone(true);
+    setScrollLocked(true);
+    const el=document.querySelector(".wl");
+    if(el)el.scrollTop=0;
+    setTimeout(()=>setScrollLocked(false),1200);
+  }
   return(
     <>
-      {!preloaderDone&&<Preloader onDone={()=>setPreloaderDone(true)}/>}
-      <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:preloaderDone?"auto":"hidden"}}>
+      {!preloaderDone&&<Preloader onDone={handlePreloaderDone}/>}
+      <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:(!preloaderDone||scrollLocked)?"hidden":"auto"}}>
         <style>{CSS}</style>
         <DynamicIslandNav menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
         <MenuOverlay open={menuOpen} onClose={()=>setMenuOpen(false)}/>
