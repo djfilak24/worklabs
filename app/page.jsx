@@ -278,11 +278,12 @@ function Preloader({onDone}){
     const w=ms=>new Promise(r=>setTimeout(r,ms));
     (async()=>{
       await w(700);  if(c)return; setWo(true);
-      await w(1400); if(c)return; setSt(true);
-      await w(700);  if(c)return; setLb(true);
-      await w(550);  if(c)return; setPg(true);setPu(true);
-      await w(1400); if(c)return; setPu(false);
-      await w(600);  if(c)return; setSh(true);
+      await w(1500); if(c)return; setSt(true);
+      await w(600);  if(c)return; setLb(true);   // Labs begins expanding
+      await w(160);  if(c)return; setPg(true);   // place collapses almost immediately — fluid morph
+      await w(780);  if(c)return; setPu(true);   // pulse ring once morph settles
+      await w(1100); if(c)return; setPu(false);
+      await w(500);  if(c)return; setSh(true);
       await w(400);  if(c)return; setRdy(true);
     })();
     return()=>{c=true;};
@@ -346,7 +347,7 @@ function Preloader({onDone}){
           <div style={{
             display:"inline-block",overflow:"hidden",whiteSpace:"nowrap",
             maxWidth:pg?"0px":"50vw",opacity:pg?0:1,
-            transition:"max-width 0.42s cubic-bezier(.4,0,.2,1), opacity 0.2s ease",
+            transition:"max-width 0.38s cubic-bezier(0.4,0,1,1), opacity 0.22s ease 0.08s",
           }}>
             <div style={{position:"relative",display:"inline-block"}}>
               <span style={{
@@ -377,7 +378,7 @@ function Preloader({onDone}){
             fontSize:FS,fontWeight:700,color:"#00BADC",letterSpacing:"-0.02em",
             display:"inline-block",overflow:"hidden",whiteSpace:"nowrap",
             maxWidth:lb?"40vw":"0px",opacity:lb?1:0,
-            transition:"max-width 0.32s cubic-bezier(.4,0,.2,1), opacity 0.18s ease",
+            transition:"max-width 0.58s cubic-bezier(0.16,1,0.3,1), opacity 0.24s ease",
           }}> Labs</span>
         </div>
 
@@ -411,7 +412,7 @@ function Preloader({onDone}){
           letterSpacing:"0.2em",textTransform:"uppercase",
           color:"#00BADC",background:"rgba(0,186,220,.04)",
           border:"1px solid rgba(0,186,220,.38)",borderRadius:3,
-          cursor:"pointer",WebkitTapHighlightColor:"transparent",
+          cursor:"pointer",WebkitTapHighlightColor:"transparent",whiteSpace:"nowrap",
           animation:sh?"wlBtnPulse 2.4s ease-in-out infinite":"none",
           opacity:sh?1:0,transition:"opacity 0.7s ease",
         }}>Enter the Lab</button>
