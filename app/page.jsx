@@ -1041,10 +1041,10 @@ export default function WorkLabs(){
   return(
     <>
       {!preloaderDone&&<Preloader onDone={handlePreloaderDone}/>}
+      <DynamicIslandNav menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
+      <MenuOverlay open={menuOpen} onClose={()=>setMenuOpen(false)}/>
       <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:(!preloaderDone||scrollLocked)?"hidden":"auto",overscrollBehavior:"none"}}>
         <style>{CSS}</style>
-        <DynamicIslandNav menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
-        <MenuOverlay open={menuOpen} onClose={()=>setMenuOpen(false)}/>
         <Hero preloaderDone={preloaderDone}/>
         <NetworkSection/>
         <WorkSection/>
