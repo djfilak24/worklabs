@@ -444,7 +444,7 @@ function Hero({preloaderDone}){
   },[preloaderDone]);
   const a=(d)=>rdy?{animation:`wlUp .65s cubic-bezier(.22,1,.36,1) ${d}s both`}:{opacity:0};
   return(
-    <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",padding:`clamp(100px,13vh,140px) ${isMobile?"24px":"48px"} clamp(48px,7vh,72px)`,overflow:"hidden",background:BG}}>
+    <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",padding:`${isMobile?"clamp(160px,22vh,200px)":"clamp(100px,13vh,140px)"} ${isMobile?"24px":"48px"} clamp(48px,7vh,72px)`,overflow:"hidden",background:BG}}>
       {/* Living blueprint background — drifting orbs reveal the grid */}
       <HeroCanvas/>
       {/* Blueprint grid — faint base; orbs + sweep illuminate it */}
