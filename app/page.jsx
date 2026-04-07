@@ -106,6 +106,8 @@ const CSS=`
   @keyframes wlPulseRing  {0%{transform:scale(1);opacity:.75}100%{transform:scale(1.65);opacity:0}}
   @keyframes wlBounceArrow{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(7px);opacity:.9}}
   @keyframes wlTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes wlBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,186,220,.32),0 0 18px rgba(0,186,220,.12);transform:translateX(-50%) translateY(0)}50%{box-shadow:0 0 0 10px rgba(0,186,220,0),0 0 32px rgba(0,186,220,.28);transform:translateX(-50%) translateY(-3px)}}
+  @keyframes wlScrollPulse{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:.7;transform:translateY(6px)}}
 
   .wl-card{cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,border-color .3s ease;}
   .wl-card:hover,.wl-card.wl-demo{transform:translateY(-6px);box-shadow:0 28px 56px rgba(0,0,0,.65),0 0 0 1px rgba(0,186,220,.3);border-color:rgba(0,186,220,.25)!important;}
@@ -403,22 +405,24 @@ function Preloader({onDone}){
       {/* Scroll hint — button on mobile, arrow on desktop */}
       {isMobile?(
         <button onClick={doExit} style={{
-          marginTop:32,padding:"13px 36px",
+          position:"absolute",bottom:52,left:"50%",
+          padding:"14px 44px",
           fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:600,
           letterSpacing:"0.2em",textTransform:"uppercase",
-          color:"#00BADC",background:"transparent",
-          border:"1px solid rgba(0,186,220,.4)",borderRadius:3,
+          color:"#00BADC",background:"rgba(0,186,220,.04)",
+          border:"1px solid rgba(0,186,220,.38)",borderRadius:3,
           cursor:"pointer",WebkitTapHighlightColor:"transparent",
-          boxShadow:"0 0 20px rgba(0,186,220,.14)",
-          opacity:sh?1:0,transition:"opacity 0.6s ease",
+          animation:sh?"wlBtnPulse 2.4s ease-in-out infinite":"none",
+          opacity:sh?1:0,transition:"opacity 0.7s ease",
         }}>Enter the Lab</button>
       ):(
         <div style={{
-          position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",
-          display:"flex",flexDirection:"column",alignItems:"center",
+          position:"absolute",bottom:36,left:"50%",transform:"translateX(-50%)",
+          display:"flex",flexDirection:"column",alignItems:"center",gap:5,
           opacity:sh?1:0,transition:"opacity 0.6s ease",pointerEvents:"none",
         }}>
-          <div style={{width:1,height:36,background:"linear-gradient(to bottom,#3a5a60,transparent)",animation:"wlBounceArrow 1.6s ease-in-out infinite"}}/>
+          <div style={{width:1,height:32,background:"linear-gradient(to bottom,rgba(0,186,220,.45),transparent)",animation:"wlBounceArrow 1.8s ease-in-out infinite"}}/>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="rgba(0,186,220,.4)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
       )}
     </div>
@@ -463,12 +467,13 @@ function Hero({preloaderDone}){
         </div>
         <p style={{fontFamily:"'Poppins',sans-serif",fontWeight:300,fontSize:"clamp(14px,1.4vw,17px)",lineHeight:1.82,color:"rgba(248,248,248,.52)",maxWidth:560,...a(1.05)}}>{CONTENT.heroBody}</p>
         <div style={{display:"flex",gap:14,marginTop:36,flexWrap:"wrap",justifyContent:"center",...a(1.18)}}>
-          <a href="#work" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",textDecoration:"none",padding:"15px 38px",background:`linear-gradient(135deg,${BLUE} 0%,#0092b5 100%)`,color:"#fff",borderRadius:6,boxShadow:`0 0 28px rgba(0,186,220,.4),0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)`,transition:"box-shadow .25s,transform .2s"}}
+          <a href="#work" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",textDecoration:"none",padding:"15px 38px",background:`linear-gradient(135deg,${BLUE} 0%,#0092b5 100%)`,color:"#fff",borderRadius:6,boxShadow:`0 0 28px rgba(0,186,220,.4),0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)`,transition:"box-shadow .25s,transform .2s",display:"inline-flex",alignItems:"center",gap:8}}
             onMouseEnter={e=>{e.currentTarget.style.boxShadow=`0 0 48px rgba(0,186,220,.65),0 4px 18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18)`;e.currentTarget.style.transform="translateY(-2px)";}}
-            onMouseLeave={e=>{e.currentTarget.style.boxShadow=`0 0 28px rgba(0,186,220,.4),0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)`;e.currentTarget.style.transform="translateY(0)";}}>Explore the Work</a>
-          <a href="#manifesto" style={{fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:500,letterSpacing:"0.14em",textTransform:"uppercase",textDecoration:"none",padding:"15px 38px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(248,248,248,.16)",color:"rgba(248,248,248,.55)",borderRadius:6,backdropFilter:"blur(10px)",boxShadow:"inset 0 1px 0 rgba(255,255,255,.05)",transition:"background .25s,border-color .25s,color .25s,transform .2s,box-shadow .25s"}}
-            onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,186,220,.07)";e.currentTarget.style.borderColor=`rgba(0,186,220,.4)`;e.currentTarget.style.color=BLUE;e.currentTarget.style.boxShadow=`0 0 16px rgba(0,186,220,.15),inset 0 1px 0 rgba(255,255,255,.06)`;e.currentTarget.style.transform="translateY(-2px)";}}
-            onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.03)";e.currentTarget.style.borderColor="rgba(248,248,248,.16)";e.currentTarget.style.color="rgba(248,248,248,.55)";e.currentTarget.style.boxShadow="inset 0 1px 0 rgba(255,255,255,.05)";e.currentTarget.style.transform="translateY(0)";}}>Our Manifesto</a>
+            onMouseLeave={e=>{e.currentTarget.style.boxShadow=`0 0 28px rgba(0,186,220,.4),0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18)`;e.currentTarget.style.transform="translateY(0)";}}
+          >Explore the Work<svg width="11" height="11" viewBox="0 0 11 11" fill="none" style={{opacity:.8}}><path d="M5.5 1v9M1.5 6.5l4 4 4-4" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg></a>
+          <a href="#manifesto" style={{fontFamily:"'Poppins',sans-serif",fontSize:10,fontWeight:400,letterSpacing:"0.12em",textTransform:"uppercase",textDecoration:"none",padding:"15px 32px",background:"transparent",border:"1px solid rgba(248,248,248,.1)",color:"rgba(248,248,248,.35)",borderRadius:6,transition:"border-color .25s,color .25s,transform .2s"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(248,248,248,.22)";e.currentTarget.style.color="rgba(248,248,248,.65)";e.currentTarget.style.transform="translateY(-1px)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(248,248,248,.1)";e.currentTarget.style.color="rgba(248,248,248,.35)";e.currentTarget.style.transform="translateY(0)";}}>Our Manifesto</a>
         </div>
         {/* Live project badges */}
         <div style={{display:"flex",gap:10,marginTop:28,flexWrap:"wrap",justifyContent:"center",...a(1.35)}}>
@@ -479,6 +484,11 @@ function Hero({preloaderDone}){
               <span style={{fontFamily:"'Poppins',sans-serif",fontSize:9,letterSpacing:"0.12em",color:b.dot,textTransform:"uppercase",opacity:.8}}>{b.status}</span>
             </div>
           ))}
+        </div>
+        {/* Scroll draw-down */}
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:5,marginTop:44,...a(1.8)}}>
+          <div style={{width:1,height:28,background:`linear-gradient(to bottom,rgba(248,248,248,.18),transparent)`,animation:"wlScrollPulse 2s ease-in-out infinite"}}/>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="rgba(248,248,248,.2)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
       </div>
     </section>
