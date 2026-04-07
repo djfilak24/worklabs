@@ -260,6 +260,16 @@ function Preloader({onDone}){
   const [rdy,setRdy]=useState(false); // scroll ready
   const [exiting,setExiting]=useState(false);
   const [gone,setGone]=useState(false);
+  const isMobile=useIsMobile();
+  const firedRef=useRef(false);
+
+  function doExit(){
+    if(firedRef.current)return;
+    firedRef.current=true;
+    setExiting(true);
+    setTimeout(()=>setGone(true),560);
+    setTimeout(onDone,900);
+  }
 
   useEffect(()=>{
     let c=false;
@@ -278,30 +288,26 @@ function Preloader({onDone}){
 
   useEffect(()=>{
     if(!rdy)return;
-    let fired=false;
-    function doExit(){
-      if(fired)return; fired=true;
-      setExiting(true);
-      setTimeout(()=>setGone(true),560);
-      setTimeout(onDone,900);
-    }
     function onWh(e){if(e.deltaY>0)doExit();}
-    let ty=0;
-    function onTs(e){ty=e.touches[0].clientY;}
-    function onTe(e){if(ty-e.changedTouches[0].clientY>30)doExit();}
     window.addEventListener('wheel',onWh,{passive:true});
-    window.addEventListener('touchstart',onTs,{passive:true});
-    window.addEventListener('touchend',onTe,{passive:true});
-    return()=>{
-      window.removeEventListener('wheel',onWh);
-      window.removeEventListener('touchstart',onTs);
-      window.removeEventListener('touchend',onTe);
-    };
-  },[rdy,onDone]);
+    if(!isMobile){
+      let ty=0;
+      function onTs(e){ty=e.touches[0].clientY;}
+      function onTe(e){if(ty-e.changedTouches[0].clientY>30)doExit();}
+      window.addEventListener('touchstart',onTs,{passive:true});
+      window.addEventListener('touchend',onTe,{passive:true});
+      return()=>{
+        window.removeEventListener('wheel',onWh);
+        window.removeEventListener('touchstart',onTs);
+        window.removeEventListener('touchend',onTe);
+      };
+    }
+    return()=>window.removeEventListener('wheel',onWh);
+  },[rdy,isMobile]);
 
   if(gone)return null;
 
-  const FS="clamp(64px,10vw,120px)";
+  const FS=isMobile?"clamp(30px,8vw,46px)":"clamp(64px,10vw,120px)";
   const TS="opacity 0.6s ease, transform 0.65s cubic-bezier(.22,1,.36,1)";
 
   return(
@@ -314,6 +320,7 @@ function Preloader({onDone}){
       {/* Stage */}
       <div style={{
         display:"flex",flexDirection:"column",alignItems:"center",
+        maxWidth:"100vw",padding:"0 24px",boxSizing:"border-box",
         transform:exiting?"translateY(-65px)":"translateY(0)",
         transition:exiting?"transform 0.55s cubic-bezier(.22,1,.36,1)":"none",
       }}>
@@ -393,14 +400,27 @@ function Preloader({onDone}){
         </div>
       </div>
 
-      {/* Scroll hint — arrow only */}
-      <div style={{
-        position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",
-        display:"flex",flexDirection:"column",alignItems:"center",
-        opacity:sh?1:0,transition:"opacity 0.6s ease",pointerEvents:"none",
-      }}>
-        <div style={{width:1,height:36,background:"linear-gradient(to bottom,#3a5a60,transparent)",animation:"wlBounceArrow 1.6s ease-in-out infinite"}}/>
-      </div>
+      {/* Scroll hint — button on mobile, arrow on desktop */}
+      {isMobile?(
+        <button onClick={doExit} style={{
+          marginTop:32,padding:"13px 36px",
+          fontFamily:"'Poppins',sans-serif",fontSize:11,fontWeight:600,
+          letterSpacing:"0.2em",textTransform:"uppercase",
+          color:"#00BADC",background:"transparent",
+          border:"1px solid rgba(0,186,220,.4)",borderRadius:3,
+          cursor:"pointer",WebkitTapHighlightColor:"transparent",
+          boxShadow:"0 0 20px rgba(0,186,220,.14)",
+          opacity:sh?1:0,transition:"opacity 0.6s ease",
+        }}>Enter the Lab</button>
+      ):(
+        <div style={{
+          position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",
+          display:"flex",flexDirection:"column",alignItems:"center",
+          opacity:sh?1:0,transition:"opacity 0.6s ease",pointerEvents:"none",
+        }}>
+          <div style={{width:1,height:36,background:"linear-gradient(to bottom,#3a5a60,transparent)",animation:"wlBounceArrow 1.6s ease-in-out infinite"}}/>
+        </div>
+      )}
     </div>
   );
 }
@@ -583,8 +603,33 @@ function useCountUp(target,active,duration=2500){
   },[target,active,duration]);
   return val;
 }
-function StatChip({stat,active,index}){
+function StatChip({stat,active,index,isMobile}){
   const val=useCountUp(stat.value,active,1800+index*100);
+  if(isMobile) return(
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+      gap:6,padding:"24px 16px",
+      opacity:active?1:0,transition:`opacity .5s ease ${index*.1}s`,
+    }}>
+      <span style={{fontFamily:"'Poppins',sans-serif",fontWeight:700,
+        fontSize:"clamp(36px,9vw,52px)",color:FG,letterSpacing:"-0.02em",lineHeight:1}}>
+        {val}
+      </span>
+      <span style={{fontFamily:"'Poppins',sans-serif",fontSize:9,fontWeight:400,
+        letterSpacing:"0.16em",textTransform:"uppercase",
+        color:"rgba(248,248,248,.28)",textAlign:"center"}}>
+        {stat.label}
+      </span>
+      <div style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,
+        padding:"3px 8px",borderRadius:12,
+        background:`${stat.color}15`,border:`1px solid ${stat.color}30`}}>
+        <span style={{width:5,height:5,borderRadius:"50%",background:stat.color,opacity:.85,flexShrink:0,display:"inline-block"}}/>
+        <span style={{fontFamily:"'Poppins',sans-serif",fontSize:8,fontWeight:500,
+          letterSpacing:"0.1em",textTransform:"uppercase",color:stat.color,whiteSpace:"nowrap"}}>
+          {stat.badge}
+        </span>
+      </div>
+    </div>
+  );
   return(
     <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",
       gap:10,padding:"15px 20px",
@@ -617,17 +662,30 @@ function StatAndFilter({activeFilter,setFilter}){
   const [ref,on]=useReveal(0.15);const isMobile=useIsMobile();
   return(
     <div ref={ref} style={{background:BG3,borderTop:"1px solid rgba(255,255,255,.06)",borderBottom:"1px solid rgba(255,255,255,.06)",width:"100%",overflow:"hidden"}}>
-      <div style={{display:"flex",alignItems:"center",flexWrap:isMobile?"wrap":"nowrap",width:"100%"}}>
-        {CONTENT.stats.map((s,i)=>(
-          <React.Fragment key={i}>
-            <StatChip stat={s} active={on} index={i}/>
-            {i<CONTENT.stats.length-1&&(
-              <div style={{width:1,alignSelf:"stretch",flexShrink:0,
-                background:"linear-gradient(to bottom,transparent,rgba(255,255,255,.08) 20%,rgba(255,255,255,.08) 80%,transparent)"}}/>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+      {isMobile?(
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",width:"100%"}}>
+          {CONTENT.stats.map((s,i)=>(
+            <div key={i} style={{
+              borderRight:i%2===0?"1px solid rgba(255,255,255,.06)":"none",
+              borderBottom:i<2?"1px solid rgba(255,255,255,.06)":"none",
+            }}>
+              <StatChip stat={s} active={on} index={i} isMobile={true}/>
+            </div>
+          ))}
+        </div>
+      ):(
+        <div style={{display:"flex",alignItems:"center",flexWrap:"nowrap",width:"100%"}}>
+          {CONTENT.stats.map((s,i)=>(
+            <React.Fragment key={i}>
+              <StatChip stat={s} active={on} index={i} isMobile={false}/>
+              {i<CONTENT.stats.length-1&&(
+                <div style={{width:1,alignSelf:"stretch",flexShrink:0,
+                  background:"linear-gradient(to bottom,transparent,rgba(255,255,255,.08) 20%,rgba(255,255,255,.08) 80%,transparent)"}}/>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -970,7 +1028,7 @@ export default function WorkLabs(){
   return(
     <>
       {!preloaderDone&&<Preloader onDone={handlePreloaderDone}/>}
-      <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:(!preloaderDone||scrollLocked)?"hidden":"auto"}}>
+      <div className="wl" style={{background:BG,color:FG,minHeight:"100vh",fontFamily:"'Poppins',sans-serif",height:"100vh",overflowY:(!preloaderDone||scrollLocked)?"hidden":"auto",overscrollBehavior:"none"}}>
         <style>{CSS}</style>
         <DynamicIslandNav menuOpen={menuOpen} setMenuOpen={setMenuOpen}/>
         <MenuOverlay open={menuOpen} onClose={()=>setMenuOpen(false)}/>
