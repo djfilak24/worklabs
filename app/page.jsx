@@ -116,6 +116,8 @@ const CSS=`
   .wl-card:hover .wl-tagline,.wl-card.wl-demo .wl-tagline{opacity:1!important;transform:translateY(0)!important;}
   .wl-catpill{cursor:pointer;transition:background .18s,border-color .18s;}
   .wl-nl{transition:color .2s;}.wl-nl:hover{color:#f8f8f8!important;}
+  .wl-hero{padding:clamp(100px,13vh,140px) 48px clamp(48px,7vh,72px);}
+  @media(max-width:639px){.wl-hero{padding:160px 24px 48px !important;justify-content:flex-start !important;}}
   .wl::-webkit-scrollbar{width:5px}.wl::-webkit-scrollbar-track{background:#090909}.wl::-webkit-scrollbar-thumb{background:#222228;border-radius:3px}
   .wl-mscroll::-webkit-scrollbar{width:4px}.wl-mscroll::-webkit-scrollbar-track{background:transparent}.wl-mscroll::-webkit-scrollbar-thumb{background:#2a2a30;border-radius:2px}
 `;
@@ -445,7 +447,7 @@ function Hero({preloaderDone}){
   },[preloaderDone]);
   const a=(d)=>rdy?{animation:`wlUp .65s cubic-bezier(.22,1,.36,1) ${d}s both`}:{opacity:0};
   return(
-    <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:isMobile?"flex-start":"center",alignItems:"center",padding:`${isMobile?"140px 24px 48px":"clamp(100px,13vh,140px) 48px clamp(48px,7vh,72px)"}`,overflow:"hidden",background:BG}}>
+    <section className="wl-hero" style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",overflow:"hidden",background:BG}}>
       {/* Living blueprint background — drifting orbs reveal the grid */}
       <HeroCanvas/>
       {/* Blueprint grid — faint base; orbs + sweep illuminate it */}
